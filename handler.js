@@ -12,7 +12,7 @@ const readdir=promisify(fs.readdir)
 
 const defaultTemplate= handleBars.compile(require("./template/default_template"))
 // const defaultTemplate= handleBars.compile(require("./template/default_template"))
-const {defaultShowPage,needCompressExtName}=require("./config")
+const {defaultShowPage,needCompressExtName,cors}=require("./config")
 
 
 function handleNotFound(res){
@@ -25,11 +25,15 @@ function handleFile(req, res,pathName){
     const extName = path.extname(process.cwd()+pathName).slice(1);
   
     let readStream=fs.createReadStream(process.cwd()+pathName);
-    res.writeHead(200,{'Content-Type': mime.getType(pathName)+';charset=utf-8'})
-  
+    res.setHeader('Content-Type',mime.getType(pathName)+';charset=utf-8')
+    if(cors){
+     res.setHeader('Access-Control-Allow-Origin', "*")
+    }
+
     if(isNeedCompress(extName)){
         readStream = handleCompressFile(req, res,readStream)
     }
+
     readStream.pipe(res)
 }
 
