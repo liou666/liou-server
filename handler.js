@@ -18,7 +18,7 @@ const {defaultShowPage,needCompressExtName,cors,maxAge}=require("./config")
 
 function handleNotFound(res){
     const rs= fs.createReadStream("./404.html")
-    res.writeHead(404, {'Content-Type': 'text/plain'})
+    res.writeHead(404, {'Content-Type': 'text/html'})
     rs.pipe(res)
 }
 
@@ -27,10 +27,7 @@ async function handleFile(req, res,pathName ,stat){
     const hash = crypto.createHash('sha1'); 
     const lastModified= new Date(stat.mtime).toGMTString();
     let readStream=fs.createReadStream(process.cwd()+pathName);
-    
-    // hash.update(readStream)
-    // readStream.pipe(hash) 
-    // const etag= hash.digest("hex")
+   
     readStream.on('data', (data) => {
         hash.update(data);
     });
@@ -54,7 +51,6 @@ async function handleFile(req, res,pathName ,stat){
     
         let rs =  await getReadStream(req,res, pathName,stat)
         if(isNeedCompress(extName)){
-            console.log("isNeedCompress");
             rs = handleCompressFile(req, res,rs)
         }
     
@@ -93,7 +89,7 @@ async function handleDirectory(res,pathName,files){
        })
     }
     const result= defaultTemplate({currentPath:pathName,fileList})
-    // console.log(fileList);
+
     res.writeHead(200,{'Content-Type': 'text/html;charset=utf-8',})
     res.end(result)
 }
@@ -104,10 +100,7 @@ function isShouldReturn304(req,serverModifiedTime,etag){
     if(!ifNoneMatch&&!ifModifiedSince){
        return false
     }
-console.log("ifNoneMatch", ifNoneMatch);
-console.log("etag", etag);
-console.log("ifModifiedSince", ifModifiedSince);
-console.log("serverModifiedTime", serverModifiedTime);
+  
     if(ifNoneMatch!==etag&&+new Date(ifModifiedSince)!==+new Date(serverModifiedTime)){
         return false
     }
@@ -119,7 +112,6 @@ console.log("serverModifiedTime", serverModifiedTime);
 //设置缓存
 function setCache(res,stat,etag){
     const lastModified= new Date(stat.mtime).toGMTString();
-    console.log(lastModified);
     //设置一小时后过期
     const expiresTime= new Date(+new Date()+60*60*1000).toGMTString();
     //Cache-Control 强缓存http1.1 
@@ -144,24 +136,6 @@ function setCache(res,stat,etag){
 }
 
 
-async function handleCache(req,res){
-    //强缓存
-    //响应头中expires、pragma或者cache-control字段，代表这是强缓存;浏览器就会把资源缓存在memory cache 或 disk cache中。
-    const newTime=+new Date();
-
-    //res.setHeader("cache-control",`public,max-age=${maxAge}`);
-  
-    //协商缓存
-    //Etag / If-None-Match
-    //Last-Modified / If-Modified-Since
-    new Date().toGMTString()
-    const ifNoneMatch=req.header["if-none-match"];
-    const ifModifiedSince=req.header["if-modified-since"]
-    res.setHeader('Cache-Control', 'public, max-age=0');
-    res.setHeader('Last-Modified', new Date().toGMTString());
-    res.setHeader('ETag', "sdjhfjshdjf");
-}
-
 function isHasDefaultShowPage(files){
     return files.includes(defaultShowPage)
 }
@@ -172,7 +146,6 @@ function isNeedCompress(extname){
 
 
 function handleCompressFile(req,res,readStream){
-    console.log("handleCompressFile");
     const acceptEncoding = req.headers["accept-encoding"];
     if(!acceptEncoding){
         return readStream
@@ -197,7 +170,14 @@ module.exports=async (req,res)=>{
       return  handleNotFound(res)
     }
 
-    const stats= await stat(filePath);
+    let stats=''
+
+    try {
+         stats= await stat(filePath);
+    } catch (error) {
+        return  handleNotFound(res)
+    }
+ 
 
     if(stats.isDirectory()){//文件夹操作
         const files =await readdir(process.cwd()+pathName);
@@ -211,5 +191,3 @@ module.exports=async (req,res)=>{
     
   
 }
-//压缩
-//缓存
