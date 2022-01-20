@@ -3,9 +3,11 @@ const path=require("path")
 const {promisify}=require("util")
 const zlib=require("zlib")
 const crypto=require("crypto")
+const {Readable}=require("stream")
 
 const handleBars=require("handlebars");
 const mime =require("mime")
+const marked =require("marked")
 
 const readFile=promisify(fs.readFile)
 const stat=promisify(fs.stat)
@@ -24,6 +26,7 @@ function handleNotFound(res){
 
 async function handleFile(req, res,pathName ,stat){
     const extName = path.extname(process.cwd()+pathName).slice(1);
+   
     const hash = crypto.createHash('sha1'); 
     const lastModified= new Date(stat.mtime).toGMTString();
     let readStream=fs.createReadStream(process.cwd()+pathName);
@@ -53,7 +56,16 @@ async function handleFile(req, res,pathName ,stat){
         if(isNeedCompress(extName)){
             rs = handleCompressFile(req, res,rs)
         }
-    
+
+        if(extName==="md"){
+            const mdFile=fs.readFileSync(process.cwd()+pathName,{encoding:"utf-8"});
+            const s = new Readable();
+            s.push(marked.parse(mdFile));
+            s.push(null);
+            rs=s;
+            res.setHeader('Content-Type','text/html;charset=utf-8')
+         }
+
          rs.pipe(res)
 
     })
@@ -188,6 +200,4 @@ module.exports=async (req,res)=>{
       handleFile(req, res,pathName,stats)
     }
      
-    
-  
 }
