@@ -1,8 +1,12 @@
 {
-  "name": "static-server",
+  "name": "liou-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "liou-server": "./bin/serve",
+    "s": "./bin/serve"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,10 +17,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chalk": "^5.0.0",
     "colors": "^1.4.0",
-    "ejs": "^3.1.6",
+    "commander": "^8.3.0",
     "handlebars": "^4.7.7",
+    "marked": "^4.0.10",
     "mime": "^3.0.0"
   }
 }
