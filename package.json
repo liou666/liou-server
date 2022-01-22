@@ -1,6 +1,6 @@
 {
   "name": "liou-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "node static server",
   "main": "index.js",
   "bin": {
