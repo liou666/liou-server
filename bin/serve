@@ -16,7 +16,7 @@ program
   
 program.addHelpText('after', `
 Example call:
-    server -c -p 8000 `);
+    liou-server -c -p 8000 `);
 
 program.parse(process.argv)
 const options = program.opts()
