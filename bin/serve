@@ -1,22 +1,20 @@
 #!/usr/bin/env node
 
-const Server =require("../lib/server")
-
-
 const { program } = require('commander')
+const Server = require('../lib/server')
 
 program
-  .option('-p, --port <number>', '启动端口' ,3000)
-  .option('-c, --cors', '是否跨域',false)
-  .option('-m, --max-age <number>', '强缓存的有效时间',3600)
-  .option('-ch, --charset <string>', '文档解析规则','utf-8')
-  .option('-o, --open-default ', '是否打开默认文件',true)
-  .option('-d, --default-show-page <string>', '默认文件','index.html')
-  program.version('0.0.1');
-  
+  .option('-p, --port <number>', '启动端口', 3000)
+  .option('-c, --cors', '是否跨域', false)
+  .option('-m, --max-age <number>', '强缓存的有效时间', 3600)
+  .option('-ch, --charset <string>', '文档解析规则', 'utf-8')
+  .option('-o, --open-default ', '是否打开默认文件', true)
+  .option('-d, --default-show-page <string>', '默认文件', 'index.html')
+program.version('0.0.1')
+
 program.addHelpText('after', `
 Example call:
-    liou-server -c -p 8000 `);
+    liou-server -c -p 8000 `)
 
 program.parse(process.argv)
 const options = program.opts()
